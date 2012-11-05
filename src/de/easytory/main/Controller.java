@@ -1,8 +1,14 @@
+package de.easytory.main;
 
 import java.sql.ResultSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Vector;
+
+import de.easytory.Start;
+import de.easytory.database.Database;
+import de.easytory.gui.FilterListItem;
+import de.easytory.tools.Logger;
 
 
 /*
@@ -58,15 +64,11 @@ public class Controller
                Thing t = new Thing(rs.getString("value"), rs.getString("related_entity"), true);
                thingList.add(t); 
            }
-           statusMessage = "getThings() successful"; 
         }
-        catch(Exception e)
-        {
-            statusMessage = "Database Error during getThings(): " + e.toString(); 
-        }
+        catch(Exception e){ writeLog(e); }
         return thingList;
     }
-    
+
     public Vector<String> getThingNames(String nameLike, String entity)
     {
         Vector<String> thingList = new Vector<String>();
@@ -76,12 +78,8 @@ public class Controller
            while (rs.next()) thingList.add(rs.getString("name")); 
            rs = db.getVirtualThings(nameLike, entity);
            while (rs.next()) thingList.add(rs.getString("value")); 
-           statusMessage = "getThingNames() successful"; 
         }
-        catch(Exception e)
-        {
-            statusMessage = "Database Error during getThingNames(): " + e.toString(); 
-        }
+        catch(Exception e){ writeLog(e); }
         return thingList;
     }
     
@@ -103,12 +101,8 @@ public class Controller
                Thing t = new Thing(rs.getString("value"), entity, true);
                thingList.add(t); 
            }
-           statusMessage = "loadThings() successful"; 
         }
-        catch(Exception e)
-        {
-            statusMessage = "Database Error during getThingsByEntity(): " + e.toString(); 
-        }
+        catch(Exception e){ writeLog(e); }
         return thingList;
     }
     
@@ -127,14 +121,9 @@ public class Controller
                Thing t = new Thing(rs.getString("name"), rs.getString("entity"), rs.getString("id"),rs.getString("note"));
                addValuesToThing(t);
                thingList.add(t); 
-               statusMessage = "getFilteredThings() successful"; 
            }
         }
-        catch(Exception e)
-        {
-            statusMessage = "Database Error during getFilteredThings(): " + e.toString(); 
-            e.printStackTrace();
-        }
+        catch(Exception e){ writeLog(e); }
         return thingList;
     }
     
@@ -167,12 +156,8 @@ public class Controller
                     if (!thingList.contains(t)) thingList.add(t); // Distinct
                 }
            }
-           statusMessage = "getRelatedThings() successful";
         }
-        catch(Exception e)
-        {
-            statusMessage = "Database Error during loadRelatedThings(): " + e.toString(); 
-        }
+        catch(Exception e){ writeLog(e); }
         return thingList;
     }
     
@@ -192,12 +177,8 @@ public class Controller
                addValuesToThing(t);
                thingList.add(t); 
            }
-           statusMessage = "getRelationsFrom() successful";
         }
-        catch(Exception e)
-        {
-            statusMessage = "Database Error during loadRelatedThings(): " + e.toString(); 
-        }
+        catch(Exception e){ writeLog(e); }
         return thingList;
     }
     
@@ -208,10 +189,7 @@ public class Controller
         {
            addAttributes(entity);
         }
-        catch(Exception e)
-        {
-            statusMessage = "Database Error during addAttributes() to entity: " + e.toString(); 
-        }
+        catch(Exception e){ writeLog(e); }
         return entity;
     }
     
@@ -250,13 +228,8 @@ public class Controller
                String label =  "<html>" + rs.getString("c") + ": " + rs.getString("value") + " - <font style=\"color:999999;font-size:8px\">" + rs.getString("name") + "</font></hmtl>";
                if (rs.getInt("c")>1) v.add(new FilterListItem(label, rs.getString("name"), rs.getString("value"), entity));
            }
-           statusMessage = "getFilter() successful";
         }
-        catch(Exception e)
-        {
-            statusMessage = "Database Error during getFilter(): " + e.toString(); 
-            e.printStackTrace();
-        }
+        catch(Exception e){ writeLog(e); }
         return v;
     }
     
@@ -271,20 +244,15 @@ public class Controller
                Entity e = new Entity(rs.getString("entity"));
                addAttributes(e);
                v.add(e);
-               statusMessage = "getEntities() successful";
            }
            rs = db.getEntityListFromValue();
            while (rs.next()) 
            {
                Entity e = new Entity(rs.getString("related_entity"));
                if (!v.contains(e)) v.add(e);
-               statusMessage = "getEntities() successful";
            }
         }
-        catch(Exception e)
-        {
-            statusMessage = "Database Error during getEntities(): " + e.toString(); 
-        }
+        catch(Exception e){ writeLog(e); }
         return v;
     }
     
@@ -295,11 +263,7 @@ public class Controller
            db.deleteThing(t.getId());
            statusMessage = "Item '" + t.getName() + "' deleted.";
         }
-        catch(Exception e)
-        {
-           statusMessage = "Database Error during delete '" + t.getName() + "': " + e.toString(); 
-        }
-            
+        catch(Exception e){ writeLog(e); }
     }    
     
     /**
@@ -334,9 +298,9 @@ public class Controller
                 return true;
             }
             catch(Exception e)
-            {
-                statusMessage = "Database Error during add item: " + e.toString(); 
-                return false;
+            { 
+            	writeLog(e);
+            	return false;
             }
         }
     }
@@ -351,8 +315,8 @@ public class Controller
             }
             catch(Exception ex)
             {
-                statusMessage = "Database Error during delete entity: " + ex.toString(); 
-                return false;
+            	writeLog(ex);
+            	return false;
             }   
     
     }
@@ -366,8 +330,8 @@ public class Controller
         }
         catch(Exception ex)
         {
-            statusMessage = "Database Error during delete thing relations: " + ex.toString(); 
-            return false;
+        	writeLog(ex);
+        	return false;
         }   
     
     }
@@ -392,8 +356,8 @@ public class Controller
             }
             catch(Exception ex)
             {
-                statusMessage = "Database Error during edit item: " + ex.toString(); 
-                return false;
+            	writeLog(ex);
+            	return false;
             }
         }
     }
@@ -443,8 +407,8 @@ public class Controller
             }
             catch(Exception e)
             {
-                statusMessage = "Database Error during edit item: " + e.toString(); 
-                return false;
+            	writeLog(e);
+            	return false;
             }
         }
     }
@@ -459,8 +423,8 @@ public class Controller
         }
         catch(Exception e)
         {
-           statusMessage = "Database Error during existRelatedEntity: " + e.toString(); 
-           return "";
+        	writeLog(e);
+        	return "";
         }
     }
     
@@ -474,8 +438,8 @@ public class Controller
         }
         catch(Exception e)
         {
-           statusMessage = "Database Error during existValue: " + e.toString(); 
-           return false;
+        	writeLog(e);
+        	return false;
         }
         
     }
@@ -495,12 +459,16 @@ public class Controller
         }
         catch(Exception e)
         {
-           statusMessage = "Database Error during existThing: " + e.toString(); 
-           return null;
+        	writeLog(e);
+        	return null;
         }
     }
         
-
+	private void writeLog(Exception e) 
+	{
+		Logger.getInstance().log(e.toString()); 
+		statusMessage = "Operation failed (Refer to '" + Start.getLogFileName() + "' for details): " + e.toString();
+	}
         
     public void dbDisconnext()
     {

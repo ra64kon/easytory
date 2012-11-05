@@ -1,3 +1,5 @@
+package de.easytory.gui;
+
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Cursor;
@@ -35,6 +37,13 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+
+import de.easytory.Start;
+import de.easytory.exporter.ExportGraphML;
+import de.easytory.importer.ImportCVS;
+import de.easytory.main.Controller;
+import de.easytory.main.Entity;
+import de.easytory.main.Thing;
 
 /*
     Easytory - the easy repository
@@ -126,7 +135,7 @@ public Gui()
     JScrollPane spRelationTo = new JScrollPane(relationToList);
     JScrollPane spRelationFrom = new JScrollPane(relationFromList);
            
-    //Unterdrücken der Umrandung der ScrollPane's
+    // No ScrollPane border
     spEntity.setBorder(new javax.swing.border.EmptyBorder(0,0,0,0));
     spFilter.setBorder(new javax.swing.border.EmptyBorder(0,0,0,0));
     spItem.setBorder(new javax.swing.border.EmptyBorder(0,0,0,0));
@@ -138,22 +147,20 @@ public Gui()
     relationPanel.add(spRelationTo);
     relationPanel.add(spRelationFrom);
     
-    //Zentrale Suche mit 4 Listen
+    // Central Lists
     JPanel listPanel = new JPanel(new GridLayout(1, 4));
     listPanel.add(spEntity);
     listPanel.add(spFilter);
     listPanel.add(spItem);
     listPanel.add(relationPanel);
-    //tpMain.addTab("Flexitory",mainPanel);
     
     //Buttonleiste
     JPanel buttonPanel = new JPanel(new GridLayout(3, 1));
     buttonPanel.add(createAddButton());
     buttonPanel.add(createEditButton());
     buttonPanel.add(createRemoveButton());
-        
-    
-    //Panel für Detailansicht und Buttons
+   
+    // Item detail panel with buttons
     JPanel detailPanel = new JPanel(new BorderLayout());
     detailPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Item Details"),BorderFactory.createEmptyBorder(5,5,5,5)));
     detailPanel.add(itemView,BorderLayout.CENTER);
@@ -169,9 +176,7 @@ public Gui()
     statusArea.setText("This program comes with ABSOLUTELY NO WARRANTY! This is free software, and you are welcome to redistribute it.");
            
     getContentPane().add(input, BorderLayout.NORTH);
-    //getContentPane().add(tpEntity, BorderLayout.WEST);
     getContentPane().add(tpMain, BorderLayout.CENTER);
-    //getContentPane().add(buttonPanel, BorderLayout.EAST);
     getContentPane().add(statusArea, BorderLayout.SOUTH);
   }
   
@@ -585,7 +590,7 @@ public Gui()
                      if (response == JOptionPane.YES_OPTION) 
                      {
                          setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)); 
-                         Export e = new Export(controller);
+                         ExportGraphML e = new ExportGraphML(controller);
                          if (e.exportGraphML())
                          {
                             JOptionPane.showMessageDialog(gui, "Export file 'Easytory.graphml' successful created.");

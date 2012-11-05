@@ -1,3 +1,5 @@
+package de.easytory.gui;
+
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,6 +14,10 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+
+import de.easytory.main.Controller;
+import de.easytory.main.Entity;
+import de.easytory.main.Value;
 /*
     Easytory - the easy repository
     Copyright (C) 2012, Ralf Konwalinka

@@ -1,3 +1,5 @@
+package de.easytory.gui;
+
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -13,6 +15,11 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+
+import de.easytory.main.Controller;
+import de.easytory.main.Entity;
+import de.easytory.main.Thing;
+import de.easytory.main.Value;
 
 /*
     Easytory - the easy repository

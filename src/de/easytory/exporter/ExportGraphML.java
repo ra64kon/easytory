@@ -1,17 +1,22 @@
+package de.easytory.exporter;
+
 import java.io.File;
-import java.util.*;
+import java.util.Iterator;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
- 
+
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import de.easytory.main.Controller;
+import de.easytory.main.Thing;
+import de.easytory.tools.Logger;
 /*
     Easytory - the easy repository
     Copyright (C) 2012, Ralf Konwalinka
@@ -29,11 +34,11 @@ import org.w3c.dom.Element;
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-public class Export
+public class ExportGraphML
 {
     private Controller controller;
     
-    public Export(Controller controller)
+    public ExportGraphML(Controller controller)
     {
         this.controller = controller;
     }
@@ -94,14 +99,11 @@ public class Export
                 return true;
      
           } 
-          catch (ParserConfigurationException pce) 
+          catch (Exception e) 
           {
-            pce.printStackTrace(); return false;
+        	  writeLog(e);
+        	  return false;
           } 
-          catch (TransformerException tfe) 
-          {
-            tfe.printStackTrace(); return false;
-          }
     }
     
     private Element createElement(Document doc, Element parent, String child, String childValue)
@@ -118,4 +120,9 @@ public class Export
         attr.setValue(value);
         e.setAttributeNode(attr);    
     }
+    
+	private void writeLog(Exception e) 
+	{
+		Logger.getInstance().log(e.toString()); 
+	}
 }
