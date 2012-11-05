@@ -1,8 +1,15 @@
+package de.easytory.importer;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.StringTokenizer;
 import java.util.Vector;
+
+import de.easytory.gui.Gui;
+import de.easytory.main.Controller;
+import de.easytory.main.Thing;
+import de.easytory.main.Value;
 /*
 Easytory - the easy repository
 Copyright (C) 2012, Ralf Konwalinka

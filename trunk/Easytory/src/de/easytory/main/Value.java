@@ -1,3 +1,4 @@
+package de.easytory.main;
 import java.util.UUID;
 
 /*

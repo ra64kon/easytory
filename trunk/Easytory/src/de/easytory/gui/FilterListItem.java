@@ -1,3 +1,4 @@
+package de.easytory.gui;
 
 /*
     Easytory - the easy repository

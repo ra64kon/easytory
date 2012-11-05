@@ -1,3 +1,5 @@
+package de.easytory.database;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -6,6 +8,9 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Iterator;
 import java.util.LinkedList;
+
+import de.easytory.Start;
+import de.easytory.gui.FilterListItem;
 
 /*
 Easytory - the easy repository

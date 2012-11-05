@@ -1,7 +1,11 @@
+package de.easytory;
+
 import java.awt.Image;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+
+import de.easytory.gui.Gui;
 
 
 /*
@@ -23,9 +27,10 @@ import javax.swing.JFrame;
 */
 public class Start 
 {
-    private static final double version = 0.053;
+    private static final double version = 0.1;
     private static final String databaseName = "Easytory";
     private static final String iconFileName = "easytory.png";
+    private static final String logFileName = "easytory.log";
     
     /**
      * @param args
@@ -39,9 +44,11 @@ public class Start
         gui.setSize(900, 600);
         gui.setLocationRelativeTo(gui.getParent());
         gui.setVisible(true);
+        //Logger.getInstance().log("Starting Easytory");
     }
     
     public static String getVersion(){return "V" + version;}
     public static String getDatabaseName(){return databaseName;}
+    public static String getLogFileName(){return logFileName;}
     
 }
