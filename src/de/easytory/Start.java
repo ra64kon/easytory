@@ -27,9 +27,9 @@ import de.easytory.gui.Gui;
 */
 public class Start 
 {
-    private static final double version = 0.1;
+    private static final double version = 0.101;
     private static final String databaseName = "Easytory";
-    private static final String iconFileName = "easytory.png";
+    //private static final String iconFileName = "easytory.png";
     private static final String logFileName = "easytory.log";
     
     /**
@@ -38,7 +38,8 @@ public class Start
     public static void main(String[] args) 
     {
         Gui gui = new Gui();
-        Image icon = new ImageIcon(iconFileName).getImage();  
+        //Image icon = new ImageIcon(iconFileName).getImage();  
+        Image icon = new ImageIcon(gui.getClass().getResource("/res/easytory.png")).getImage();
         if (icon!=null) gui.setIconImage(icon);
         gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); 
         gui.setSize(900, 600);
