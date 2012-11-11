@@ -39,7 +39,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import de.easytory.Start;
-import de.easytory.exporter.ExportGraphML;
+import de.easytory.exporter.ExportController;
+
 import de.easytory.importer.ImportCVS;
 import de.easytory.main.Controller;
 import de.easytory.main.Entity;
@@ -586,18 +587,48 @@ public Gui()
             {     
                 public void run() 
                 {         
-                     int response = JOptionPane.showConfirmDialog(gui, "Do you want to export all data to GraphML (this can take a while)?","Export GraphML", JOptionPane.YES_NO_OPTION);
+                     int response = JOptionPane.showConfirmDialog(gui, "Do you want to export all data to GraphML?","Export GraphML", JOptionPane.YES_NO_OPTION);
                      if (response == JOptionPane.YES_OPTION) 
                      {
                          setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)); 
-                         ExportGraphML e = new ExportGraphML(controller);
-                         if (e.exportGraphML())
+                         //ExportGraphML e = new ExportGraphML(controller);
+                         ExportController e = new ExportController(controller);
+                         if (e.export("ExportGraphML")) //e.exportGraphML()
                          {
                             JOptionPane.showMessageDialog(gui, "Export file 'Easytory.graphml' successful created.");
                          }
                          else
                          {
-                             JOptionPane.showMessageDialog(gui,"Exporting GraphML failed.", "Export error",JOptionPane.ERROR_MESSAGE);
+                             JOptionPane.showMessageDialog(gui,"Exporting GraphML failed. Show 'easytory.log' for details.", "Export error",JOptionPane.ERROR_MESSAGE);
+                         }
+                         setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR)); 
+                     }
+                }
+            }); 
+        }
+    });
+    
+    JMenuItem exportXLSX = new JMenuItem("Export XLSX");
+    exportXLSX.addActionListener(new ActionListener() 
+    {
+        public void actionPerformed(ActionEvent e) 
+        {
+            SwingUtilities.invokeLater(new Runnable() 
+            {     
+                public void run() 
+                {         
+                     int response = JOptionPane.showConfirmDialog(gui, "Do you want to export all data to XLSX?","Export GraphML", JOptionPane.YES_NO_OPTION);
+                     if (response == JOptionPane.YES_OPTION) 
+                     {
+                         setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)); 
+                         ExportController e = new ExportController(controller);
+                         if (e.export("ExportXLSX")) 
+                         {
+                            JOptionPane.showMessageDialog(gui, "Export file 'easytory.xlsx' successful created.");
+                         }
+                         else
+                         {
+                             JOptionPane.showMessageDialog(gui,"Exporting XLSX failed. Show 'easytory.log' for details.", "Export error",JOptionPane.ERROR_MESSAGE);
                          }
                          setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR)); 
                      }
@@ -689,6 +720,7 @@ public Gui()
     JMenu fMenu = new JMenu("File");
     fMenu.add(importCSV);
     fMenu.add(exportGraphML);
+    fMenu.add(exportXLSX);
     
     JMenu eMenu = new JMenu("Entity");
     eMenu.add(renameEntity);
