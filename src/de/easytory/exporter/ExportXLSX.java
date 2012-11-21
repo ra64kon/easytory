@@ -1,6 +1,8 @@
 package de.easytory.exporter;
 
 import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -46,72 +48,130 @@ public class ExportXLSX implements ExportInterface
 		ExtendetSheet eSheet = new ExtendetSheet(wb.createSheet(WorkbookUtil.createSafeSheetName(entity)));
 		sheets.put(entity, eSheet);
 		
-		// Write Header
-		int colNumber = 0;
-		ExtendetRow headRow = eSheet.createRow(entity);  	    
-		headRow.createCell(colNumber,"XLSX-Header-Key", entity);
+		// Write entity to headRow / column:0
+		Row headRow = eSheet.createRow("XLSX-HeadRowId");  	    
+		Cell cell = headRow.createCell(0);
+		cell.setCellValue(entity);
 	}
 
 	@Override
 	public void processItems(String entity, String itemId, String itemName, String note) throws Exception 
 	{
 		ExtendetSheet eSheet = sheets.get(entity);
-
-		ExtendetRow row = eSheet.createRow(itemId);
-		row.createCell(0, itemId, itemName);
-		
-		eSheet.autoSizeColumn(0);
+		Row row = eSheet.createRow(itemId);
+		Cell cell = row.createCell(0);
+		cell.setCellValue(itemName);
 	}
 	
 	@Override
 	public void processValues(String entity, String itemId, String itemName, String valueString, String attributeName, int valueType, String relatedEntity) throws Exception 
 	{
-		/*
 		ExtendetSheet eSheet = sheets.get(entity);
-		ExtendetRow headRow = eSheet.getRow("XLSX-Header-Key");
-		int colNumber = headRow.getColNumber(attributeName);
-		ExtendetRow entityRow = eSheet.getRow(itemId);
-		entityRow.createCell(colNumber, attributeName, valueString);
-		*/
+		eSheet.storeValue(itemId, valueString, attributeName);
 	}
 	
 	@Override
-	public void processRelations(String entity, String itemId, String itemName,
-			String targetId) throws Exception {
+	public void processRelations(String entity, String itemId, String itemName, String targetId) throws Exception 
+	{
 		// nothing todo here for XLSX
-		
 	}
 
 	@Override
 	public void finish() throws Exception 
 	{
+		Iterator<ExtendetSheet> iSheets = sheets.values().iterator();
+		while (iSheets.hasNext()) // iterate sheets
+		{
+			ExtendetSheet eSheet = iSheets.next();
+			int col = 0;
+			int maxOffset = 0; // Offset for more than one attribute with the same name
+			String lastAttribute = "";
+			Iterator<ExtendetValue> iValues = eSheet.getValues();
+			Row headRow = eSheet.getRow("XLSX-HeadRowId");
+			while (iValues.hasNext()) // iterate attribute-sorted values
+			{
+				ExtendetValue e = iValues.next();
+				Row row = eSheet.getRow(e.getItemId());
+				if (!e.getAttributeName().equals(lastAttribute)) // next column 
+				{
+					col = col + maxOffset;
+					maxOffset = 0;
+					col++;
+					lastAttribute = e.getAttributeName();
+				}
+				// Set Value
+				int offset = getOffset(row, col);
+				if (maxOffset<offset) maxOffset = offset;
+				row.createCell(col+offset).setCellValue(e.getValueString());
+				
+				// Set header
+				if (headRow.getCell(col+offset)==null) 
+				{
+					headRow.createCell(col+offset).setCellValue(e.getAttributeName());
+				}
+			}
+			// Autosize all columns
+			col = 0;
+			while(headRow.getCell(col)!=null) 
+			{
+				eSheet.autoSizeColumn(col);
+				col++;
+			}
+		}
 		FileOutputStream fileOut = new FileOutputStream("easytory.xlsx");
 	    wb.write(fileOut);
 	    fileOut.close();
 	}
 	
+	/**
+	 * Get column offset (more than one attribute with the same name possible)
+	 * 
+	 * @param row
+	 * @param col
+	 * @return
+	 */
+	private int getOffset(Row row, int col)
+	{
+		int offset = 0;
+		while (row.getCell(col+offset)!=null) offset ++;
+		return offset;
+	}
+	
 	class ExtendetSheet
 	{
 		private Sheet sheet;
-		private HashMap<String,ExtendetRow> rows = new HashMap<String,ExtendetRow>();
+		private HashMap<String,Row> rows = new HashMap<String,Row>();
 		private int rowNumber = 0;
+		private ArrayList<ExtendetValue> values = new ArrayList<ExtendetValue> ();
 		
 		public ExtendetSheet(Sheet sheet) 
 		{
 			this.sheet = sheet;
 		}
 		
-		public ExtendetRow createRow(String name) 
+		public void storeValue(String itemId, String valueString, String attributeName)
 		{
-			ExtendetRow eRow = new ExtendetRow(sheet.createRow(rowNumber));
-			rows.put(name, eRow);
+			ExtendetValue e = new ExtendetValue(itemId, valueString, attributeName);
+			values.add(e);
+		}
+		
+		public Iterator<ExtendetValue> getValues()
+		{
+			Collections.sort(values);
+			return values.iterator();
+		}
+		
+		public Row createRow(String id) 
+		{
+			Row eRow = sheet.createRow(rowNumber);
+			rows.put(id, eRow);
 			rowNumber++;
 			return eRow;
 		} 
 		
-		public ExtendetRow getRow(String name) 
+		public Row getRow(String id) 
 		{
-			return rows.get(name);
+			return rows.get(id);
 		} 
 		
 		public void autoSizeColumn(int col)
@@ -120,11 +180,49 @@ public class ExportXLSX implements ExportInterface
 		}
 	}
 
+	class ExtendetValue implements Comparable<ExtendetValue>
+	{
+		private String itemId;
+		private String valueString;
+		private String attributeName;
+		
+		public ExtendetValue(String itemId, String valueString, String attributeName)
+		{
+			this.itemId = itemId;
+			this.valueString = valueString;
+			this.attributeName = attributeName;
+		}
+		
+		public String getItemId() 
+		{
+			return itemId;
+		}
+		public String getValueString() 
+		{
+			return valueString;
+		}
+		public String getAttributeName() 
+		{
+			return attributeName;
+		}
+
+		/**
+		 * Sort by attributeName 
+		 */
+		@Override
+		public int compareTo(ExtendetValue e) 
+		{
+			return attributeName.compareTo(e.getAttributeName());
+		}
+
+	}
+
+	/*
 	class ExtendetRow
 	{
 		private Row row;
 		private HashMap<String,Integer> colNumbers = new HashMap<String,Integer>();
-		
+				
 		public ExtendetRow(Row row)
 		{
 			this.row = row;
@@ -142,7 +240,7 @@ public class ExportXLSX implements ExportInterface
 			colNumbers.put(key, colNumber);
 		}
 
-	}
+	}*/
 
 
 }
