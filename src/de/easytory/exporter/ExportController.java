@@ -33,14 +33,30 @@ public class ExportController
         this.controller = controller;
     }
     
-    public boolean export(String className)
+    public boolean exportGraphML(){ return export("ExportGraphML"); }
+    
+    public boolean exportXLSX() { return export("ExportXLSX"); }
+    
+    public boolean checkXLSX() // Check if poi library exist
     {
-        ExportInterface export;
-		try 
+   		try 
+		{
+			Class.forName("org.apache.poi.ss.usermodel.Workbook");  
+			return true;
+		} 
+    	catch (Exception e) 
+    	{
+    		return false;
+		}
+    }
+    
+    private boolean export(String className)
+    {
+    	ExportInterface export;
+    	try 
 		{
 			Class<?> theClass  = Class.forName("de.easytory.exporter." + className);
 			export = (ExportInterface)theClass.newInstance();
-
 			export.init();
 			exportEntities(export);
 			Iterator<Thing> i = controller.getThings("").iterator();
