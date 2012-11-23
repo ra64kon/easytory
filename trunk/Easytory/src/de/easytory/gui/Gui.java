@@ -593,7 +593,7 @@ public Gui()
                          setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)); 
                          //ExportGraphML e = new ExportGraphML(controller);
                          ExportController e = new ExportController(controller);
-                         if (e.export("ExportGraphML")) //e.exportGraphML()
+                         if (e.exportGraphML()) //e.exportGraphML()
                          {
                             JOptionPane.showMessageDialog(gui, "Export file 'Easytory.graphml' successful created.");
                          }
@@ -617,21 +617,28 @@ public Gui()
             {     
                 public void run() 
                 {         
-                     int response = JOptionPane.showConfirmDialog(gui, "Do you want to export all data to XLSX?","Export GraphML", JOptionPane.YES_NO_OPTION);
-                     if (response == JOptionPane.YES_OPTION) 
-                     {
-                         setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)); 
-                         ExportController e = new ExportController(controller);
-                         if (e.export("ExportXLSX")) 
-                         {
-                            JOptionPane.showMessageDialog(gui, "Export file 'easytory.xlsx' successful created.");
-                         }
-                         else
-                         {
-                             JOptionPane.showMessageDialog(gui,"Exporting XLSX failed. Show 'easytory.log' for details.", "Export error",JOptionPane.ERROR_MESSAGE);
-                         }
-                         setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR)); 
-                     }
+                	 ExportController e = new ExportController(controller);
+                	 if (e.checkXLSX())
+                	 {
+	                	 int response = JOptionPane.showConfirmDialog(gui, "Do you want to export all data to XLSX?","Export GraphML", JOptionPane.YES_NO_OPTION);
+	                     if (response == JOptionPane.YES_OPTION) 
+	                     {
+	                         setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)); 
+	                         if (e.exportXLSX()) 
+	                         {
+	                            JOptionPane.showMessageDialog(gui, "Export file 'easytory.xlsx' successful created.");
+	                         }
+	                         else
+	                         {
+	                             JOptionPane.showMessageDialog(gui,"Exporting XLSX failed. Show 'easytory.log' for details.", "Export error",JOptionPane.ERROR_MESSAGE);
+	                         }
+	                         setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR)); 
+	                     }
+                	 }
+                	 else
+                	 {
+                		 JOptionPane.showMessageDialog(gui, "XSLX-Library not installed. Take a look at Easytory website for more information.");
+                	 }
                 }
             }); 
         }
