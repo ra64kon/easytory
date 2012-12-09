@@ -40,7 +40,8 @@ public abstract class XMLDocument
         e.setAttributeNode(attr);    
     }
     
-    private void createDocument(String rootElementName, String namespace) throws ParserConfigurationException
+	
+	private void createDocument(String rootElementName, String namespace) throws ParserConfigurationException
     {
     	DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
@@ -74,5 +75,6 @@ public abstract class XMLDocument
         transformer.transform(source, result);
         return byteStream.toByteArray();		
 	}
+	
 	
 }
