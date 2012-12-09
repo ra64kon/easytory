@@ -91,12 +91,11 @@ public class WinFilesystem implements net.decasdev.dokan.DokanOperations
 		int off = (int)offset;
 		byte[] bin = new byte[0];
 		
-		/* test
 		if (fileName.equals("\\filename.txt"))
 		{		
 			String text = "Töxt";
 			bin = text.getBytes();  // this is not a good idea - charset !
-		}*/
+		}
 		
 		int size = Math.min(buffer.capacity(), bin.length-off);
 		if (size <= 0) return 0;
