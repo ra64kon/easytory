@@ -27,7 +27,7 @@ import de.easytory.gui.Gui;
 */
 public class Start 
 {
-    private static final double version = 0.105;
+    private static final double version = 0.106;
     private static final String databaseName = "Easytory";
     //private static final String iconFileName = "easytory.png";
     private static final String logFileName = "easytory.log";
