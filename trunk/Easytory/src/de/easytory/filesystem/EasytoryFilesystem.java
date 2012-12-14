@@ -1,13 +1,12 @@
 package de.easytory.filesystem;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.decasdev.dokan.DokanOperationException;
-import net.decasdev.dokan.WinError;
+import net.decasdev.dokan.Dokan;
 
 /*
 Easytory - the easy repository
@@ -28,38 +27,88 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 public class EasytoryFilesystem 
 {
+	private static String mountPoint = "V:\\";
 	private ConcurrentHashMap<String, EasytoryFile> fileMap = new ConcurrentHashMap<String, EasytoryFile>();
+	private long fileIndexCounter = 1; 
 
 	public static void main(String[] args) 
 	{
-		// TODO Auto-generated method stub
+		EasytoryFilesystem easytoryFilesystem = new EasytoryFilesystem();
+		easytoryFilesystem.createFilesystem();
+		String result = new WindowsAdapter(easytoryFilesystem).mount(mountPoint);
+		System.out.println(result);
+	}
+	
+	public static void unmount() 
+	{
+		Dokan.removeMountPoint(mountPoint);
+		System.exit(0);
 	}
 
 	public void createFilesystem()
 	{
-		// create Root
-		// create Entity Dirs
+		EasytoryFile root = createRoot();
+		EasytoryFile entity1 = createFile(root, "Entity1", true);
+		createFile(entity1, "Item1", true);
+		createFile(root, "Entity2", true);
 	}
-	
-	
-	public byte[] readFile(String filename)
+
+	private EasytoryFile createRoot() 
 	{
-		// 1. get file from HashMap
-		// 2. read content from EasytoryFile
-		
-		
-		return null;
+		EasytoryFile root = new EasytoryFile("", true, fileIndexCounter); 
+		fileMap.put("\\", root); 
+		fileIndexCounter++;
+		return root;
+	}
+
+	private EasytoryFile createFile(EasytoryFile parentDir, String fileName, boolean isDirectory) 
+	{
+		String newFileName = parentDir.getFileName() + fileName;
+		EasytoryFile newFile = new EasytoryFile(fileName, isDirectory, fileIndexCounter); 
+		fileMap.put(newFileName, newFile); 
+		parentDir.addChild(newFile);
+		fileIndexCounter++;
+		return newFile;
 	}
 	
-	private byte[] readLocalFile(String filename) throws FileNotFoundException, IOException  
+	public EasytoryFile getFileInformation(String fileName) throws FileNotFoundException
 	{
-		File file = new File(filename);
-		long size = file.length();
-		byte[] bin = new byte[(int)size];
-		FileInputStream fis = new FileInputStream(file);
-		fis.read(bin);
-        if(fis!=null) fis.close();
-        return bin;
+		EasytoryFile file = fileMap.get(fileName);
+		if (file != null) 
+		{
+			return file;
+		}
+		else
+		{
+			throw new FileNotFoundException("File '" + fileName + "' not found.");
+		}
 	}
+	
+	public Iterator<EasytoryFile> findFiles(String fileName) 
+	{
+		EasytoryFile file = fileMap.get(fileName);
+		if (file != null) 
+		{
+			return file.list();
+		}
+		else
+		{
+			return new Vector<EasytoryFile>().iterator();
+		}
+	}
+	
+	public byte[] readFile(String fileName, int from, int to) throws FileNotFoundException, IOException
+	{
+		EasytoryFile file = fileMap.get(fileName);
+		if (file != null) 
+		{
+			return file.getBinaryContent(from, to);
+		}
+		else
+		{
+			throw new FileNotFoundException("File '" + fileName + "' not found.");
+		}
+	}
+
 	
 }
