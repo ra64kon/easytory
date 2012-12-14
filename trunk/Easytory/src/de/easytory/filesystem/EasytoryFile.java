@@ -45,7 +45,7 @@ public class EasytoryFile
 		this.isDirectory = isDirectory;
 		if (!isDirectory) this.fileSize = getLocalFileSize(fileName);
 		File file = new File(fileName);
-		this.lastModified = new Date(file.lastModified());
+		if (file.exists()) this.lastModified = new Date(file.lastModified());
 		this.fileNumber = fileNumber;
 	}
 	
