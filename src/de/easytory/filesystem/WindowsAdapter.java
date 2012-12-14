@@ -1,7 +1,10 @@
 package de.easytory.filesystem;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import net.decasdev.dokan.ByHandleFileInformation;
 import net.decasdev.dokan.Dokan;
@@ -32,22 +35,31 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-public class WinFilesystem implements net.decasdev.dokan.DokanOperations
+public class WindowsAdapter implements net.decasdev.dokan.DokanOperations
 {
 	private final static int volumeSerialNumber = 8888;
-	
-	public static void main(String[] args) 
+	private EasytoryFilesystem easytoryFilesystem;
+		
+	public WindowsAdapter(EasytoryFilesystem easytoryFilesystem)
 	{
-		new WinFilesystem().mount("V:\\");
+		this.easytoryFilesystem = easytoryFilesystem;
 	}
 	
-	private void mount(String driveLetter) 
+	public String mount(String driveLetter)
 	{
 		DokanOptions dokanOptions = new DokanOptions();
         dokanOptions.mountPoint = driveLetter;
         dokanOptions.threadCount = 1;
         dokanOptions.optionsMode = DokanOptionsMode.Mode.REMOVABLE_DRIVE.getValue() + DokanOptionsMode.Mode.KEEP_ALIVE.getValue();
-		int result = Dokan.mount(dokanOptions, this);
+        try 
+        {
+			int result = Dokan.mount(dokanOptions, this);
+			return "Mount result: " + result;
+		} 
+        catch (Exception e) 
+		{
+			return "Mount error: " + e.getMessage();
+		}
 	}
 	
 	@Override
@@ -88,19 +100,22 @@ public class WinFilesystem implements net.decasdev.dokan.DokanOperations
 	@Override
 	public int onReadFile(String fileName, ByteBuffer buffer, long offset, DokanFileInfo fileInfo) throws DokanOperationException 
 	{
-		int off = (int)offset;
-		byte[] bin = new byte[0];
-		
-		if (fileName.equals("\\filename.txt"))
-		{		
-			String text = "Töxt";
-			bin = text.getBytes();  // this is not a good idea - charset !
+		int from = (int)offset;
+		try 
+		{
+			byte[] bin = easytoryFilesystem.readFile(fileName, from, buffer.capacity());
+			int size = bin.length; if (size == 0) return 0;
+			buffer.put(bin, from, size);  // hope thats correct :-/
+			return size;
+		} 
+		catch (FileNotFoundException e) 
+		{
+			throw new DokanOperationException(WinError.ERROR_FILE_NOT_FOUND);
+		} 
+		catch (IOException e) 
+		{
+			throw new DokanOperationException(WinError.ERROR_READ_FAULT);
 		}
-		
-		int size = Math.min(buffer.capacity(), bin.length-off);
-		if (size <= 0) return 0;
-		buffer.put(bin, off, size);  // hope thats correct :-/
-		return size;
 	}
 
 	@Override
@@ -119,57 +134,45 @@ public class WinFilesystem implements net.decasdev.dokan.DokanOperations
 	@Override
 	public ByHandleFileInformation onGetFileInformation(String fileName, DokanFileInfo fileInfo) throws DokanOperationException 
 	{
-		int fileAttribute = 0;
-		int fileSize = 0;
-		long creationTime = 0;
-		long lastAccessTime = 0;
-		long lastWriteTime = 0;
-		long fileIndex = 0;
-		if (fileName.equals("\\filename.txt"))
+		try 
 		{
-			fileSize = 4;
-		}
-		else if (fileName.equals("\\") || fileName.equals("\\MyDir"))
-		{
-			fileSize = 0;
-			fileAttribute = FileAttribute.FILE_ATTRIBUTE_DIRECTORY;
-		}
-		else
+			EasytoryFile file = easytoryFilesystem.getFileInformation(fileName);
+			int fileAttribute = FileAttribute.FILE_ATTRIBUTE_NORMAL;
+			long fileIndex = file.getFileNumber();
+			int fileSize = file.getFileSize();
+			long lastAccessTime = file.get64bitLastModified();
+			long creationTime = file.get64bitLastModified();
+			long lastWriteTime = file.get64bitLastModified();
+			if (file.isDirectory()) fileAttribute |= FileAttribute.FILE_ATTRIBUTE_DIRECTORY;
+			fileAttribute |= FileAttribute.FILE_ATTRIBUTE_READONLY;
+			return new ByHandleFileInformation(fileAttribute, creationTime, lastAccessTime, lastWriteTime, volumeSerialNumber, fileSize, 1, fileIndex);
+		} 
+		catch (FileNotFoundException e) 
 		{
 			throw new DokanOperationException(WinError.ERROR_FILE_NOT_FOUND);
 		}
-		
-		
-		//fileAttribute |= FileAttribute.FILE_ATTRIBUTE_READONLY;
-		
-		return new ByHandleFileInformation(fileAttribute, creationTime, lastAccessTime, lastWriteTime, volumeSerialNumber, fileSize, 1, fileIndex);
 	}
 
 	@Override
 	public Win32FindData[] onFindFiles(String pathName, DokanFileInfo fileInfo) throws DokanOperationException 
 	{
 		ArrayList<Win32FindData> files = new ArrayList<Win32FindData>();
-		
-		int fileAttribute = 0;
-		int fileSize = 0;
-		long creationTime = 0;
-		long lastAccessTime = 0;
-		long lastWriteTime = 0;
-		
-		//fileAttribute |= FileAttribute.FILE_ATTRIBUTE_READONLY;
-		fileSize = 4;
-		String fileName = "filename.txt";
-		String shortFileName = "filename.txt";
-		Win32FindData fileData = new Win32FindData(fileAttribute, creationTime, lastAccessTime, lastWriteTime, fileSize, 0, 0, fileName, shortFileName);
-		files.add(fileData);		
-		
-		fileSize = 0;
-		fileAttribute = FileAttribute.FILE_ATTRIBUTE_DIRECTORY;
-		fileName = "MyDir";
-		shortFileName = "MyDir";
-		Win32FindData dirData = new Win32FindData(fileAttribute, creationTime, lastAccessTime, lastWriteTime, fileSize, 0, 0, fileName, shortFileName);
-		files.add(dirData);
-		
+		Iterator<EasytoryFile> fileList = easytoryFilesystem.findFiles(pathName);
+		while (fileList.hasNext())
+		{
+			EasytoryFile file = fileList.next();
+			String fileName = file.getFileName();
+			String shortFileName = file.getShortFileName();
+			int fileAttribute = FileAttribute.FILE_ATTRIBUTE_NORMAL;
+			int fileSize = file.getFileSize();
+			long lastAccessTime = file.get64bitLastModified();
+			long creationTime = file.get64bitLastModified();
+			long lastWriteTime = file.get64bitLastModified();
+			if (file.isDirectory()) fileAttribute |= FileAttribute.FILE_ATTRIBUTE_DIRECTORY;
+			fileAttribute |= FileAttribute.FILE_ATTRIBUTE_READONLY;
+			Win32FindData fileData = new Win32FindData(fileAttribute, creationTime, lastAccessTime, lastWriteTime, fileSize, 0, 0, fileName, shortFileName);
+			files.add(fileData);
+		}
 		return files.toArray(new Win32FindData[0]);
 	}
 
