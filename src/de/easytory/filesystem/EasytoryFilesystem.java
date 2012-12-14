@@ -6,6 +6,10 @@ import java.util.Iterator;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
+import de.easytory.main.Controller;
+import de.easytory.main.Entity;
+import de.easytory.main.Thing;
+
 import net.decasdev.dokan.Dokan;
 
 /*
@@ -29,7 +33,8 @@ public class EasytoryFilesystem
 {
 	private static String mountPoint = "V:\\";
 	private ConcurrentHashMap<String, EasytoryFile> fileMap = new ConcurrentHashMap<String, EasytoryFile>();
-	private long fileIndexCounter = 1; 
+	private long fileIndexCounter = 1;
+	private Controller controller = new Controller();
 
 	public static void main(String[] args) 
 	{
@@ -48,9 +53,18 @@ public class EasytoryFilesystem
 	public void createFilesystem()
 	{
 		EasytoryFile root = createRoot();
-		EasytoryFile entity1 = createFile(root, "Entity1", true);
-		createFile(entity1, "Item1", true);
-		createFile(root, "Entity2", true);
+		Iterator<Entity> entities = controller.getEntities().iterator();
+		while (entities.hasNext())
+		{
+			Entity e = entities.next();
+			EasytoryFile entity = createFile(root, e.getName(), true);
+			Iterator<Thing> items = controller.getThingsByEntity(e.getName()).iterator();
+			while (items.hasNext())
+			{
+				Thing t = items.next();
+				createFile(entity, t.getName(), true);
+			}
+		}
 	}
 
 	private EasytoryFile createRoot() 
@@ -63,11 +77,14 @@ public class EasytoryFilesystem
 
 	private EasytoryFile createFile(EasytoryFile parentDir, String fileName, boolean isDirectory) 
 	{
-		String newFileName = parentDir.getFileName() + fileName;
+		String parentFileName = parentDir.getFileName();
+		if (!parentFileName.endsWith("\\")) parentFileName = parentFileName + "\\";
+		String newFileName = parentFileName + fileName;
 		EasytoryFile newFile = new EasytoryFile(fileName, isDirectory, fileIndexCounter); 
 		fileMap.put(newFileName, newFile); 
 		parentDir.addChild(newFile);
 		fileIndexCounter++;
+		System.out.println("Create: " + newFileName);
 		return newFile;
 	}
 	
@@ -76,6 +93,7 @@ public class EasytoryFilesystem
 		EasytoryFile file = fileMap.get(fileName);
 		if (file != null) 
 		{
+			System.out.println("getInfo: " + file.getFileName());
 			return file;
 		}
 		else
