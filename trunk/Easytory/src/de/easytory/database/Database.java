@@ -10,7 +10,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import de.easytory.Start;
-import de.easytory.gui.FilterListItem;
+import de.easytory.main.FilterListItem;
 
 /*
 Easytory - the easy repository

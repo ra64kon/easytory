@@ -7,7 +7,6 @@ import java.util.Vector;
 
 import de.easytory.Start;
 import de.easytory.database.Database;
-import de.easytory.gui.FilterListItem;
 import de.easytory.tools.Logger;
 
 
@@ -226,12 +225,31 @@ public class Controller
            while (rs.next()) 
            {
                String label =  "<html>" + rs.getString("c") + ": " + rs.getString("value") + " - <font style=\"color:999999;font-size:8px\">" + rs.getString("name") + "</font></hmtl>";
-               if (rs.getInt("c")>1) v.add(new FilterListItem(label, rs.getString("name"), rs.getString("value"), entity));
+               v.add(new FilterListItem(label, rs.getString("name"), rs.getString("value"), entity));
+               //if (rs.getInt("c")>1) v.add(new FilterListItem(label, rs.getString("name"), rs.getString("value"), entity));
            }
         }
         catch(Exception e){ writeLog(e); }
         return v;
     }
+    
+    /**
+     * Get all entities that can be used as filter
+     * 
+     * @param entity
+     * @return
+     *
+    public Iterator<String> getEntitiesByFilter(String entity)
+    {
+    	Vector<String> entityList = new Vector<String>();
+    	Iterator<FilterListItem> filterList = getFilter(entity).iterator();
+    	while (filterList.hasNext())
+    	{
+    		FilterListItem f = filterList.next();
+    		if (!entityList.contains(f.getEntity())) entityList.add(f.getEntity());
+    	}
+    	return entityList.iterator();
+    }*/
     
     public Vector<Entity> getEntities()
     {
