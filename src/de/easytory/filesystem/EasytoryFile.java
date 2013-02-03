@@ -6,8 +6,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Vector;
+
+import org.alfresco.jlan.server.filesys.FileAttribute;
+import org.alfresco.jlan.server.filesys.FileInfo;
 
 /*
 Easytory - the easy repository
@@ -28,9 +30,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 public class EasytoryFile 
 {
+	//private static final String slash = "\\";
 	private String fileName;
+	private String path;
 	private boolean isDirectory;
-	private long fileNumber;
+	private int fileNumber;
 	private int fileSize = 0;
 	private Date lastModified = new Date();
 	
@@ -39,7 +43,7 @@ public class EasytoryFile
 	private Vector<EasytoryFile> children = new Vector<EasytoryFile>();
 
 	
-	public EasytoryFile(String fileName, boolean isDirectory, long fileNumber) 
+	public EasytoryFile(String fileName, String path, boolean isDirectory, int fileNumber) 
 	{
 		this.fileName = fileName;
 		this.isDirectory = isDirectory;
@@ -47,6 +51,26 @@ public class EasytoryFile
 		File file = new File(fileName);
 		if (file.exists()) this.lastModified = new Date(file.lastModified());
 		this.fileNumber = fileNumber;
+		this.path = path;
+		//if (!path.endsWith(slash)) path = path + slash;
+	}
+	
+	public void getJLanFileInfo(FileInfo info) 
+	{
+		//FileInfo info = new FileInfo();
+		info.setFileName(fileName);
+		info.setPath(path);  
+		info.setFileId(fileNumber);
+		info.setModifyDateTime(getLastModified());
+        info.setCreationDateTime(getLastModified());
+		info.setChangeDateTime(getLastModified());
+		long alloc = (getFileSize() + 512L) & 0xFFFFFFFFFFFFFE00L;
+		info.setAllocationSize(alloc);
+		int fattr = 0;				
+        fattr += FileAttribute.ReadOnly;
+		if (isDirectory()) fattr += FileAttribute.Directory;
+		info.setFileAttributes(fattr);
+		//return info;
 	}
 	
 	public void addChild(EasytoryFile child)
@@ -62,24 +86,30 @@ public class EasytoryFile
 	/*
 	 * List filenames in this directory
 	 */
-	public Iterator<EasytoryFile> list()
+	public Vector<EasytoryFile> list()
 	{
 		if (isDirectory)
 		{
-			return children.iterator();
+			return children;
 		}
 		else
 		{
 			Vector<EasytoryFile> list = new Vector<EasytoryFile>();
 			list.add(this);
-			return list.iterator();
+			return list;
 		}
 	}
 	
+	public long getLastModified()
+	{
+		return lastModified.getTime();
+	}
+	
+	/*
 	public long get64bitLastModified()
 	{
 		return (lastModified.getTime() + 11644473600000L) * 10000;
-	}
+	}*/
 	
 	public byte[] getBinaryContent(int from, int to) throws FileNotFoundException, IOException
 	{
@@ -133,9 +163,15 @@ public class EasytoryFile
 		return fileSize;
 	}
 
-	public long getFileNumber() 
+	public int getFileNumber() 
 	{
 		return fileNumber;
+	}
+
+
+	public String getPath() 
+	{
+		return path;
 	}
 
 }

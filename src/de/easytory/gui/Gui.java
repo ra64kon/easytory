@@ -44,6 +44,7 @@ import de.easytory.exporter.ExportController;
 import de.easytory.importer.ImportCVS;
 import de.easytory.main.Controller;
 import de.easytory.main.Entity;
+import de.easytory.main.FilterListItem;
 import de.easytory.main.Thing;
 
 /*

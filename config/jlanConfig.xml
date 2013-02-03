@@ -1,0 +1,79 @@
+<?xml version="1.0" standalone="no"?>
+<!-- <!DOCTYPE jlanserver SYSTEM "jlanserver.dtd"> -->
+
+<jlanserver>
+  <servers>
+    <SMB/>
+    <FTP/>
+    <noNFS/>
+  </servers>
+	
+  <SMB>
+    <host name="EASYTORY" domain="WORKGROUP">
+     <!-- <tcpipSMB/>-->
+	  
+	<Win32NetBIOS/>
+	  
+		<!--<netBIOSSMB/>
+		<broadcast>192.168.0.255</broadcast>-->
+	 </host>
+    <sessionDebug flags="Negotiate,Socket,Tree"/>
+	<netbiosDebug/>
+<!--    <announceDebug/> -->
+    
+		<authenticator type="enterprise">
+			<mode>USER</mode>
+			<allowGuest/>
+      <Debug/>
+		</authenticator>
+   
+  </SMB>
+
+  <FTP>
+    <port>21</port>
+    <allowAnonymous/>
+    <debug flags="File,Search,Error,DataPort,Directory"/>
+  </FTP>
+	
+  <NFS>
+    <enablePortMapper/>
+    <debug flags="File,FileIO"/>
+  </NFS>
+
+  <debug>
+    <output>
+      <class>org.alfresco.jlan.debug.ConsoleDebug</class>
+      <logFile>jlansrv.log</logFile>
+      <append/>
+    </output>
+  </debug>
+
+  <shares>
+    <diskshare name="EASYTORY" comment="Test share">
+      <driver>
+        <class>de.easytory.filesystem.JLanAdapter</class>
+        <LocalPath>.</LocalPath>
+      </driver>
+    </diskshare>
+  </shares>		
+
+  <security>
+    <JCEProvider>cryptix.jce.provider.CryptixCrypto</JCEProvider>
+    <authenticator>
+      <class>org.alfresco.jlan.server.auth.LocalAuthenticator</class>
+      <mode>USER</mode>
+      <allowGuest/>
+    </authenticator>
+
+    <users>
+      <user name="jlansrv">
+        <password>jlan</password>
+        <comment>System administrator</comment>
+        <administrator/>
+      </user>
+      <user name="normal">
+        <password>normal</password>
+      </user>
+    </users>
+  </security>
+</jlanserver>

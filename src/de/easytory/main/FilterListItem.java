@@ -1,4 +1,4 @@
-package de.easytory.gui;
+package de.easytory.main;
 
 /*
     Easytory - the easy repository
@@ -17,7 +17,7 @@ package de.easytory.gui;
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-public class FilterListItem
+public class FilterListItem implements Comparable<FilterListItem>
 {
    private String label;
    private String entity;
@@ -62,5 +62,11 @@ public class FilterListItem
    {
       return label;
    }
+
+	@Override
+	public int compareTo(FilterListItem f) 
+	{
+		return valueName.compareTo(f.getValueName());
+	}
 
 }
