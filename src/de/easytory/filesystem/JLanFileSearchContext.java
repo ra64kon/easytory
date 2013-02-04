@@ -60,7 +60,7 @@ public class JLanFileSearchContext extends SearchContext
 		}
 		else
 		{
-			System.out.println("SearchContext:nextFileInfo cursor<=fileListSize");
+			System.out.println("SearchContext:nextFileInfo no more files");
 			return false;
 		}
 	}
@@ -77,7 +77,7 @@ public class JLanFileSearchContext extends SearchContext
 		}
 		else
 		{
-			System.err.println("JLanFileSearchContext:nextFileName cursor>=fileListSize");
+			System.err.println("JLanFileSearchContext:nextFileName no more files (return null!)");
 			return null;
 		}
 	}
