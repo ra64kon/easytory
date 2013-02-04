@@ -9,6 +9,7 @@ import org.alfresco.jlan.server.core.DeviceContext;
 import org.alfresco.jlan.server.core.DeviceContextException;
 import org.alfresco.jlan.server.filesys.DiskDeviceContext;
 import org.alfresco.jlan.server.filesys.DiskInterface;
+import org.alfresco.jlan.server.filesys.FileAttribute;
 import org.alfresco.jlan.server.filesys.FileInfo;
 import org.alfresco.jlan.server.filesys.FileOpenParams;
 import org.alfresco.jlan.server.filesys.FileSystem;
@@ -144,10 +145,20 @@ public class JLanAdapter implements DiskInterface
 	}
 
 	@Override
-	public NetworkFile openFile(SrvSession sess, TreeConnection tree,
-			FileOpenParams params) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+	public NetworkFile openFile(SrvSession sess, TreeConnection tree, FileOpenParams params) throws IOException 
+	{
+		String fileName = removeWildcardAndSlash(params.getPath());
+		System.out.println("openFile path="+ params.getPath() + " (" + fileName + ")");
+		EasytoryFile eFile= easytoryFilesystem.getFileInformation(fileName); //throws FileNotFoundException
+		JLanNetworkFile nFile = new JLanNetworkFile(eFile.getFileName());
+	    nFile.setFullName(params.getPath());
+	    //nFile.setFullName(eFile.getPath() + eFile.getFileName());
+		nFile.setFileSize(eFile.getFileSize());
+		nFile.setCreationDate(eFile.getLastModified());
+		nFile.setModifyDate(eFile.getLastModified());
+		nFile.setGrantedAccess(NetworkFile.READONLY);
+		if (eFile.isDirectory()) nFile.setAttributes(FileAttribute.Directory);
+		return nFile;
 	}
 
 	@Override
